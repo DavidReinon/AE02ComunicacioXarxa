@@ -21,6 +21,7 @@
 				<version>3.2.4</version>
 				<executions>
 					<execution>
+						<id>servidor</id>
 						<phase>package</phase>
 						<goals>
 							<goal>shade</goal>
@@ -29,21 +30,13 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>chat.Servidor</mainClass> <!--
-									paquet
-									i nom de la clase que conte metode Main -->
+									<mainClass>chat.Servidor</mainClass>
 								</transformer>
 							</transformers>
 						</configuration>
 					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.2.4</version>
-				<executions>
 					<execution>
+						<id>client</id>
 						<phase>package</phase>
 						<goals>
 							<goal>shade</goal>
@@ -52,9 +45,7 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>chat.Client</mainClass> <!--
-									paquet
-									i nom de la clase que conte metode Main -->
+									<mainClass>chat.Client</mainClass>
 								</transformer>
 							</transformers>
 						</configuration>
