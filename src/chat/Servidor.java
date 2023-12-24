@@ -17,24 +17,28 @@ public class Servidor {
 		try {
 			ServerSocket socketEscolta = new ServerSocket(1234);
 			Socket connexio = socketEscolta.accept();
+			
 			InputStream is = connexio.getInputStream();
 			InputStreamReader isr = new InputStreamReader(is);
 			BufferedReader br = new BufferedReader(isr);
-			String missatge = br.readLine();
-			System.out.println(missatge);
-			BufferedReader br2 = new BufferedReader(isr);
+			
+			String usuari = br.readLine();
+			System.out.println(usuari);
+			
+			//BufferedReader br2 = new BufferedReader(isr);
 			String contrasenya = br.readLine();
 			System.out.println(contrasenya);
-			if (AutenticacioUsuari(missatge, contrasenya)) {
-				System.out.println("Usuari y contrasenya correctes");
+			if (AutenticacioUsuari(usuari, contrasenya)) {
+				System.out.println("Ok");
 			} else {
 				System.out.println("Usuari o contrasenya incorrectes");
-
 			}
+			
 			OutputStream os = connexio.getOutputStream();
 			PrintWriter pw = new PrintWriter(os);
-			pw.write(missatge.toString() + "\n");
+			pw.write(usuari.toString() + "\n");
 			pw.flush();
+			
 			System.err.println("SERVIDOR >>> Espera nova peticio");
 		} catch (Exception e) {
 			System.out.println(e);

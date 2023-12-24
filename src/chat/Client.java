@@ -19,10 +19,11 @@ public class Client {
 			String usuario = teclat.nextLine();
 			System.out.print("Contrasenya: ");
 			String contrasenya = teclat.nextLine();
+			
 			pw.write(usuario + "\n");
 			pw.write(contrasenya + "\n");
 			pw.flush();
-			System.out.println("Missatge enviat");
+			System.out.println("Credencials enviades a servidor.");
 			// }
 			teclat.close();
 		} catch (Exception e) {
