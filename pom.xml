@@ -21,7 +21,7 @@
 				<version>3.2.4</version>
 				<executions>
 					<execution>
-						<id>servidor</id>
+						<id>shade-server</id>
 						<phase>package</phase>
 						<goals>
 							<goal>shade</goal>
@@ -33,10 +33,12 @@
 									<mainClass>chat.Servidor</mainClass>
 								</transformer>
 							</transformers>
+							<outputFile>
+								${project.build.directory}/${project.artifactId}-server-${project.version}.jar</outputFile>
 						</configuration>
 					</execution>
 					<execution>
-						<id>client</id>
+						<id>shade-client</id>
 						<phase>package</phase>
 						<goals>
 							<goal>shade</goal>
@@ -48,6 +50,8 @@
 									<mainClass>chat.Client</mainClass>
 								</transformer>
 							</transformers>
+							<outputFile>
+								${project.build.directory}/${project.artifactId}-client-${project.version}.jar</outputFile>
 						</configuration>
 					</execution>
 				</executions>
