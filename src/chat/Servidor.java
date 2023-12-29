@@ -16,37 +16,35 @@ public class Servidor {
 	public static void main(String[] args) {
 		try {
 			ServerSocket socketEscolta = new ServerSocket(1234);
-			Socket connexio = socketEscolta.accept();
+			Socket SocketConnexio = socketEscolta.accept();
 
 			// Llegir
-			InputStream is = connexio.getInputStream();
+			InputStream is = SocketConnexio.getInputStream();
 			InputStreamReader isr = new InputStreamReader(is);
 			BufferedReader br = new BufferedReader(isr);
 
 			// Enviar
-			OutputStream os = connexio.getOutputStream();
-			PrintWriter pw = new PrintWriter(os);
+			OutputStream os = SocketConnexio.getOutputStream();
+			PrintWriter pw = new PrintWriter(os, true);
 
-			while (true) {
-				String usuari = br.readLine();
-				String contrasenya = br.readLine();
+			String usuari = br.readLine();
+			String contrasenya = br.readLine();
 
-				System.out.println("AUTENTICACIO");
-				if (AutenticacioUsuari(usuari, contrasenya)) {
-					pw.println("Ok");
-					pw.flush();
-				} else {
-					pw.println("Usuari o contrasenya incorrectes");
-					pw.flush();
-				}
-
-				System.out.println("SERVIDOR >>> Espera nova peticio");
+			System.out.println("AUTENTICACIO");
+			if (AutenticacioUsuari(usuari, contrasenya)) {
+				pw.println("Ok");
+				pw.println(true);
+			} else {
+				pw.println("Usuari o contrasenya incorrectes");
+				pw.println(false);
 			}
+
+			socketEscolta.close();
+			System.out.println("En espera nova peticio");
 		} catch (Exception e) {
 			System.out.println(e);
 
 		}
-
 	}
 
 	private static boolean AutenticacioUsuari(String usuario, String Contrasenya) {

@@ -12,20 +12,21 @@ public class Client {
 
 	public static void main(String[] args) {
 		try {
-			Socket connexio = new Socket("localhost", 1234);
+			Socket socketConnexio = new Socket("localhost", 1234);
+
+			// Escriure
+			OutputStream os = socketConnexio.getOutputStream();
+			PrintWriter pw = new PrintWriter(os, true); // true per indicar que es faça el pw.flush() directament
 
 			// Llegir
-			InputStream is = connexio.getInputStream();
+			InputStream is = socketConnexio.getInputStream();
 			InputStreamReader isr = new InputStreamReader(is);
 			BufferedReader br = new BufferedReader(isr);
 
-			// Escriure
-			OutputStream os = connexio.getOutputStream();
-			PrintWriter pw = new PrintWriter(os, true);
-
 			Scanner teclat = new Scanner(System.in);
-			boolean eixir = false;
-			while (!eixir) {
+			
+			boolean autenticacioCorrecta = false;
+			while (!autenticacioCorrecta) {
 				System.out.print("Usuario: ");
 				String usuario = teclat.nextLine();
 				System.out.print("Contrasenya: ");
@@ -33,13 +34,16 @@ public class Client {
 
 				pw.println(usuario);
 				pw.println(contrasenya);
-				pw.flush();
+				// pw.flush();
 				System.out.println("Credencials enviades a servidor.");
 
 				String mensaje = br.readLine();
-				System.out.println(mensaje);
+				autenticacioCorrecta = Boolean.getBoolean(br.readLine());
+				System.out.println("SERVIDOR >>> " + mensaje);
 			}
+
 			teclat.close();
+			socketConnexio.close();
 		} catch (Exception e) {
 			System.out.println(e);
 		}
