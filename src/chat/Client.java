@@ -24,7 +24,7 @@ public class Client {
 			BufferedReader br = new BufferedReader(isr);
 
 			Scanner teclat = new Scanner(System.in);
-			
+
 			boolean autenticacioCorrecta = false;
 			while (!autenticacioCorrecta) {
 				System.out.print("Usuario: ");
@@ -41,6 +41,9 @@ public class Client {
 				autenticacioCorrecta = Boolean.getBoolean(br.readLine());
 				System.out.println("SERVIDOR >>> " + mensaje);
 			}
+
+			// Enviar mensatjes o exir
+			// pw.println(mensatje);
 
 			teclat.close();
 			socketConnexio.close();
