@@ -10,29 +10,27 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 public class GestioFilsServidor implements Runnable {
-	private ArrayList<String> llistaClients;
-	private int client;
-	private Socket socketConnexio;
+	private List<ObjecteClient> llistaClients;
+	private ObjecteClient objecteClient;
 
-	public GestioFilsServidor(ArrayList<String> clientsList, int client, Socket socketConnexio) {
-		super();
-		this.llistaClients = clientsList;
-		this.client = client;
-		this.socketConnexio = socketConnexio;
+	public GestioFilsServidor(List<ObjecteClient> llistaClients, ObjecteClient objecteClient) {
+		this.llistaClients = llistaClients;
+		this.objecteClient = objecteClient;
 	}
 
 	@Override
 	public void run() {
 		try {
-			// Llegir
-			InputStream is = socketConnexio.getInputStream();
+			// Recibir
+			InputStream is = objecteClient.getSocket().getInputStream();
 			InputStreamReader isr = new InputStreamReader(is);
 			BufferedReader br = new BufferedReader(isr);
 
 			// Enviar
-			OutputStream os = socketConnexio.getOutputStream();
+			OutputStream os = objecteClient.getSocket().getOutputStream();
 			PrintWriter pw = new PrintWriter(os, true);
 
 			boolean autenticacioCorrecta = false;

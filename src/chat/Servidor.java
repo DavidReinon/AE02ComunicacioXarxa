@@ -8,9 +8,9 @@ import java.util.ArrayList;
 public class Servidor {
 
 	public static void main(String[] args) throws IOException {
-		System.err.println("SERVIDOR >>> Arranca el servidor, espera peticio");
+		System.err.println("SERVIDOR >>> Arranca el servidor, espera petición");
 		ServerSocket socketEscolta = null;
-		ArrayList<String> llistaClients = new ArrayList<String>();
+		ArrayList<ObjecteClient> listaClients = new ArrayList<>();
 
 		try {
 			socketEscolta = new ServerSocket(1234);
@@ -19,16 +19,21 @@ public class Servidor {
 			return;
 		}
 
-		int contadorClients = 1;
+		int contadorClients = 0;
 		while (true) {
 			Socket connexio = socketEscolta.accept();
-			llistaClients.add("client" + contadorClients);
-			System.err.println("SERVIDOR >>> Connexio rebuda --> Llança fil per gestionar: "
-					+ llistaClients.get(contadorClients - 1));
-			GestioFilsServidor filServidor = new GestioFilsServidor(llistaClients, contadorClients, connexio);
+
+			ObjecteClient objecteClient = new ObjecteClient("client" + (contadorClients + 1), contadorClients,
+					connexio);
+			listaClients.add(objecteClient);
+
+			System.err.println(
+					"SERVIDOR >>> Conexión recibida --> Lanza hilo para gestionar: " + objecteClient.getNombre());
+			GestioFilsServidor filServidor = new GestioFilsServidor(listaClients, objecteClient);
 			Thread fil = new Thread(filServidor);
 			fil.start();
+
+			contadorClients++;
 		}
 	}
-
 }
