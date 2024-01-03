@@ -12,8 +12,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.graalvm.compiler.printer.CanonicalStringGraphPrinter;
-
 public class GestioFilsServidor implements Runnable {
 	private List<ObjecteClient> llistaClients;
 	private ObjecteClient objecteClient;
