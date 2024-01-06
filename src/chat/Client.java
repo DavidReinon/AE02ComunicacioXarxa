@@ -1,56 +1,91 @@
 package chat;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 
 public class Client {
 
-	public static void main(String[] args) {
-		try {
-			Socket socketConnexio = new Socket("localhost", 1234);
+    private static boolean autenticacionCorrecta = false;
 
-			// Escriure
-			OutputStream os = socketConnexio.getOutputStream();
-			PrintWriter pw = new PrintWriter(os, true); // true per indicar que es faça el pw.flush() directament
+    public static void main(String[] args) {
+        try {
+            Socket socketConnexio = new Socket("localhost", 1234);
 
-			// Llegir
-			InputStream is = socketConnexio.getInputStream();
-			InputStreamReader isr = new InputStreamReader(is);
-			BufferedReader br = new BufferedReader(isr);
+            // Escriure
+            OutputStream os = socketConnexio.getOutputStream();
+            PrintWriter pw = new PrintWriter(os, true);
 
-			Scanner teclat = new Scanner(System.in);
+            // Llegir
+            InputStream is = socketConnexio.getInputStream();
+            InputStreamReader isr = new InputStreamReader(is);
+            BufferedReader br = new BufferedReader(isr);
 
-			boolean autenticacioCorrecta = false;
-			while (!autenticacioCorrecta) {
-				System.out.print("Usuario: ");
-				String usuario = teclat.nextLine();
-				System.out.print("Contrasenya: ");
-				String contrasenya = teclat.nextLine();
+            // Clase auxiliar para manejar el cliente
+            ObjecteClient clientHandler = new ObjecteClient("client", 1, socketConnexio, br);
+            Thread envioThread = new Thread(() -> enviarMensajes(pw));
+            Thread recepcionThread = new Thread(clientHandler::recibirMensajes);
 
-				pw.println(usuario);
-				pw.println(contrasenya);
-				// pw.flush();
-				System.out.println("Credencials enviades a servidor.");
+            // Iniciar hilos
+            envioThread.start();
+            recepcionThread.start();
 
-				String mensaje = br.readLine();
-				autenticacioCorrecta = Boolean.getBoolean(br.readLine());
-				System.out.println("SERVIDOR >>> " + mensaje);
-			}
+            // Esperar hasta que ambos hilos terminen
+            envioThread.join();
+            recepcionThread.join();
 
-			// Enviar mensatjes o exir
-			// pw.println(mensatje);
+            socketConnexio.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-			teclat.close();
-			socketConnexio.close();
-		} catch (Exception e) {
-			System.out.println(e);
-		}
+    private static void enviarMensajes(PrintWriter pw) {
+        try {
+            Scanner teclado = new Scanner(System.in);
+            while (!autenticacionCorrecta) {
+                System.out.print("Usuario: ");
+                String usuario = teclado.nextLine();
+                System.out.print("Contrasenya: ");
+                String contrasenya = teclado.nextLine();
 
-	}
+                pw.println(usuario);
+                pw.println(contrasenya);
 
+                String respuesta = br.readLine(); // Cambiado de pw a br
+                autenticacionCorrecta = Boolean.parseBoolean(respuesta);
+
+                if (!autenticacionCorrecta) {
+                    System.out.println("SERVIDOR >>> " + br.readLine());
+                }
+            }
+
+            while (true) {
+                System.out.print("Mensaje: ");
+                String mensaje = teclado.nextLine();
+                pw.println(getTimestamp() + " - " + mensaje);
+
+                if (mensaje.equalsIgnoreCase("exit")) {
+                    break;
+                }
+            }
+
+            teclado.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static String getTimestamp() {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        return "[" + sdf.format(new Date()) + "]";
+    }
 }
+
