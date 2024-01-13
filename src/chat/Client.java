@@ -7,85 +7,95 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.ReadOnlyBufferException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
 
 public class Client {
 
-    private static boolean autenticacionCorrecta = false;
+	public static void main(String[] args) {
+		Scanner teclado = new Scanner(System.in);
+		try {
+			Socket socketConnexio = new Socket("localhost", 1234);
 
-    public static void main(String[] args) {
-        try {
-            Socket socketConnexio = new Socket("localhost", 1234);
+			// Escriure
+			OutputStream os = socketConnexio.getOutputStream();
+			PrintWriter pw = new PrintWriter(os, true);
 
-            // Escriure
-            OutputStream os = socketConnexio.getOutputStream();
-            PrintWriter pw = new PrintWriter(os, true);
+			// Llegir
+			InputStream is = socketConnexio.getInputStream();
+			InputStreamReader isr = new InputStreamReader(is);
+			BufferedReader br = new BufferedReader(isr);
 
-            // Llegir
-            InputStream is = socketConnexio.getInputStream();
-            InputStreamReader isr = new InputStreamReader(is);
-            BufferedReader br = new BufferedReader(isr);
+			autenticacio(teclado, pw, br);
 
-            // Clase auxiliar para manejar el cliente
-            ObjecteClient clientHandler = new ObjecteClient("client", 1, socketConnexio, br);
-            Thread envioThread = new Thread(() -> enviarMensajes(pw));
-            Thread recepcionThread = new Thread(clientHandler::recibirMensajes);
+			// Lanzar fil llegir
+			GestioFilsRebreClient rebreClient = new GestioFilsRebreClient(br);
+			Thread fil = new Thread(rebreClient);
+			fil.start();
 
-            // Iniciar hilos
-            envioThread.start();
-            recepcionThread.start();
+			enviarMensatge(teclado, pw);
 
-            // Esperar hasta que ambos hilos terminen
-            envioThread.join();
-            recepcionThread.join();
+			/*
+			 * // Clase auxiliar para manejar el cliente ObjecteClient clientHandler = new
+			 * ObjecteClient("client", 1, socketConnexio, br); Thread envioThread = new
+			 * Thread(() -> enviarMensajes(pw)); Thread recepcionThread = new
+			 * Thread(clientHandler::recibirMensajes);
+			 * 
+			 * // Iniciar hilos envioThread.start(); recepcionThread.start();
+			 * 
+			 * // Esperar hasta que ambos hilos terminen envioThread.join();
+			 * recepcionThread.join();
+			 */
 
-            socketConnexio.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+			socketConnexio.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		teclado.close();
+	}
 
-    private static void enviarMensajes(PrintWriter pw) {
-        try {
-            Scanner teclado = new Scanner(System.in);
-            while (!autenticacionCorrecta) {
-                System.out.print("Usuario: ");
-                String usuario = teclado.nextLine();
-                System.out.print("Contrasenya: ");
-                String contrasenya = teclado.nextLine();
+	private static void autenticacio(Scanner teclado, PrintWriter pw, BufferedReader br) {
+		boolean autenticacionCorrecta = false;
+		try {
+			while (!autenticacionCorrecta) {
+				System.out.print("Usuario: ");
+				String usuario = teclado.nextLine();
+				System.out.print("Contrasenya: ");
+				String contrasenya = teclado.nextLine();
 
-                pw.println(usuario);
-                pw.println(contrasenya);
+				pw.println(usuario);
+				pw.println(contrasenya);
 
-                String respuesta = br.readLine(); // Cambiado de pw a br
-                autenticacionCorrecta = Boolean.parseBoolean(respuesta);
+				String respostaString = br.readLine();
+				System.out.println("SERVIDOR >>> " + respostaString);
+				
+				Boolean respostaBoolean = Boolean.parseBoolean(br.readLine());
+				autenticacionCorrecta = respostaBoolean;
+			}
 
-                if (!autenticacionCorrecta) {
-                    System.out.println("SERVIDOR >>> " + br.readLine());
-                }
-            }
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
-            while (true) {
-                System.out.print("Mensaje: ");
-                String mensaje = teclado.nextLine();
-                pw.println(getTimestamp() + " - " + mensaje);
+	private static void enviarMensatge(Scanner teclado, PrintWriter pw) {
 
-                if (mensaje.equalsIgnoreCase("exit")) {
-                    break;
-                }
-            }
+		while (true) {
+			System.out.print("Mensatje: ");
+			String mensaje = teclado.nextLine();
+			if (mensaje.equalsIgnoreCase("exit")) {
+				pw.println(mensaje);
+				break;
+			}
+			pw.println(mensaje + " - " + getTimestamp());
 
-            teclado.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+		}
+	}
 
-    private static String getTimestamp() {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-        return "[" + sdf.format(new Date()) + "]";
-    }
+	private static String getTimestamp() {
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+		return "[" + sdf.format(new Date()) + "]";
+	}
 }
-

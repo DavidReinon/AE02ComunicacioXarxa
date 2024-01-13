@@ -15,6 +15,8 @@ import java.util.List;
 public class GestioFilsServidor implements Runnable {
 	private List<ObjecteClient> llistaClients;
 	private ObjecteClient objecteClient;
+	private BufferedReader br;
+	private PrintWriter pw;
 
 	public GestioFilsServidor(List<ObjecteClient> llistaClients, ObjecteClient objecteClient) {
 		this.llistaClients = llistaClients;
@@ -27,11 +29,11 @@ public class GestioFilsServidor implements Runnable {
 			// Recibir
 			InputStream is = objecteClient.getSocket().getInputStream();
 			InputStreamReader isr = new InputStreamReader(is);
-			BufferedReader br = new BufferedReader(isr);
+			br = new BufferedReader(isr);
 
 			// Enviar
 			OutputStream os = objecteClient.getSocket().getOutputStream();
-			PrintWriter pw = new PrintWriter(os, true);
+			pw = new PrintWriter(os, true);
 
 			boolean autenticacioCorrecta = false;
 			while (!autenticacioCorrecta) {
@@ -51,10 +53,10 @@ public class GestioFilsServidor implements Runnable {
 				}
 			}
 
-			boolean eixir = false;
-			while (!eixir) {
+			boolean eixir = true;
+			while (eixir) {
 				String missatge = br.readLine();
-				eixir = ExecutarMisstage(missatge, pw, br);
+				eixir = ExecutarMisstage(missatge);
 			}
 
 		} catch (Exception e) {
@@ -65,7 +67,7 @@ public class GestioFilsServidor implements Runnable {
 
 	}
 
-	private boolean ExecutarMisstage(String missatge, PrintWriter pw, BufferedReader br) {
+	private boolean ExecutarMisstage(String missatge) {
 		if (missatge.equals("exit")) {
 			llistaClients.remove(objecteClient);
 			try {
@@ -76,14 +78,14 @@ public class GestioFilsServidor implements Runnable {
 
 			}
 			// Client tanca la seva terminal
-			return true;
+			return false;
 		}
 		if (missatge.equals("?")) {
 			pw.print("Clients disponibles:");
 			for (ObjecteClient client : llistaClients) {
 				pw.print(" | " + client.getNom());
 			}
-			return false;
+			return true;
 		}
 		if (missatge.startsWith("@")) {
 			String[] missatgeArrayStrings = missatge.split(" ");
@@ -102,30 +104,31 @@ public class GestioFilsServidor implements Runnable {
 					PrintWriter pwThisClient = new PrintWriter(osThisClient, true);
 					String mensatgeSenseTagString = "";
 
+					// Per no enviar el '@usuari' comença per 1
 					for (int i = 1; i < missatgeArrayStrings.length; i++) {
 						mensatgeSenseTagString += missatgeArrayStrings[i];
 					}
 
-					pwThisClient.println(mensatgeSenseTagString);
+					pwThisClient.println(objecteClient.getNom() + " >>> " + mensatgeSenseTagString);
 					pwThisClient.close();
-					return false;
+					return true;
 				}
 			}
 			pw.println("SERVIDOR >>> Client no trobat");
-			return false;
+			return true;
 		}
 
-		// Mensatge per a tots
+		// Mensatge per a tots > menos a ell
 		for (ObjecteClient client : llistaClients) {
-			OutputStream osClient = null;
+			OutputStream osThisClient = null;
 			try {
-				osClient = client.getSocket().getOutputStream();
+				osThisClient = client.getSocket().getOutputStream();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 
-			PrintWriter pwCliente = new PrintWriter(osClient, true);
-			pwCliente.println(objecteClient.getNom() + " >>> " + missatge);
+			PrintWriter pwThisClient = new PrintWriter(osThisClient, true);
+			pwThisClient.println(objecteClient.getNom() + " >>> " + missatge);
 		}
 		return false;
 	}
