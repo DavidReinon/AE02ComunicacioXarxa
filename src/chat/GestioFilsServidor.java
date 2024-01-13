@@ -13,13 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GestioFilsServidor implements Runnable {
-	private List<ObjecteClient> llistaClients;
+	private static List<ObjecteClient> llistaClients;
 	private ObjecteClient objecteClient;
 	private BufferedReader br;
 	private PrintWriter pw;
 
 	public GestioFilsServidor(List<ObjecteClient> llistaClients, ObjecteClient objecteClient) {
-		this.llistaClients = llistaClients;
+		GestioFilsServidor.llistaClients = llistaClients;
 		this.objecteClient = objecteClient;
 	}
 
@@ -53,10 +53,14 @@ public class GestioFilsServidor implements Runnable {
 				}
 			}
 
-			boolean eixir = true;
-			while (eixir) {
+			boolean seguir = true;
+			while (seguir) {
 				String missatge = br.readLine();
-				eixir = ExecutarMisstage(missatge);
+				if (missatge == null) {
+					seguir = false; // Se detectó el cierre del BufferedReader
+				} else if (!missatge.isBlank()) {
+					seguir = ExecutarMisstage(missatge);
+				}
 			}
 
 		} catch (Exception e) {
@@ -85,6 +89,7 @@ public class GestioFilsServidor implements Runnable {
 			for (ObjecteClient client : llistaClients) {
 				pw.print(" | " + client.getNom());
 			}
+			pw.println();
 			return true;
 		}
 		if (missatge.startsWith("@")) {
@@ -110,25 +115,30 @@ public class GestioFilsServidor implements Runnable {
 					}
 
 					pwThisClient.println(objecteClient.getNom() + " >>> " + mensatgeSenseTagString);
-					pwThisClient.close();
-					return true;
+					pwThisClient.println();
+					break;
 				}
 			}
-			pw.println("SERVIDOR >>> Client no trobat");
 			return true;
+
 		}
 
-		// Mensatge per a tots > menos a ell
+		
 		for (ObjecteClient client : llistaClients) {
-			OutputStream osThisClient = null;
-			try {
-				osThisClient = client.getSocket().getOutputStream();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			
+			// Mensatge per a tots menos a ell mateix
+			if (!client.getNom().equals(objecteClient.getNom())) {
+				
+				OutputStream osThisClient = null;
+				try {
+					osThisClient = client.getSocket().getOutputStream();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 
-			PrintWriter pwThisClient = new PrintWriter(osThisClient, true);
-			pwThisClient.println(objecteClient.getNom() + " >>> " + missatge);
+				PrintWriter pwThisClient = new PrintWriter(osThisClient, true);
+				pwThisClient.println(objecteClient.getNom() + " >>> " + missatge);
+			}
 		}
 		return false;
 	}

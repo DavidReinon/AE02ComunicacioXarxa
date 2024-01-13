@@ -70,7 +70,7 @@ public class Client {
 
 				String respostaString = br.readLine();
 				System.out.println("SERVIDOR >>> " + respostaString);
-				
+
 				Boolean respostaBoolean = Boolean.parseBoolean(br.readLine());
 				autenticacionCorrecta = respostaBoolean;
 			}
@@ -83,13 +83,15 @@ public class Client {
 	private static void enviarMensatge(Scanner teclado, PrintWriter pw) {
 
 		while (true) {
-			System.out.print("Mensatje: ");
+			System.out.println("Mensatje: ");
 			String mensaje = teclado.nextLine();
 			if (mensaje.equalsIgnoreCase("exit")) {
 				pw.println(mensaje);
 				break;
-			}
-			pw.println(mensaje + " - " + getTimestamp());
+			} else if (mensaje.equalsIgnoreCase("?")) {
+				pw.println(mensaje);
+			} else
+				pw.println(mensaje + " - " + getTimestamp());
 
 		}
 	}
