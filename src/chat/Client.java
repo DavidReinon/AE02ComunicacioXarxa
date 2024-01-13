@@ -57,28 +57,32 @@ public class Client {
 	}
 
 	private static void autenticacio(Scanner teclado, PrintWriter pw, BufferedReader br) {
-		boolean autenticacionCorrecta = false;
-		try {
-			while (!autenticacionCorrecta) {
-				System.out.print("Usuario: ");
-				String usuario = teclado.nextLine();
-				System.out.print("Contrasenya: ");
-				String contrasenya = teclado.nextLine();
+	    try {
+	        while (true) {
+	            System.out.print("Usuario: ");
+	            String usuario = teclado.nextLine();
+	            System.out.print("Contrasenya: ");
+	            String contrasenya = teclado.nextLine();
 
-				pw.println(usuario);
-				pw.println(contrasenya);
+	            pw.println(usuario);
+	            pw.println(contrasenya);
 
-				String respostaString = br.readLine();
-				System.out.println("SERVIDOR >>> " + respostaString);
+	            String respostaString = br.readLine();
+	            System.out.println("SERVIDOR >>> " + respostaString);
 
-				Boolean respostaBoolean = Boolean.parseBoolean(br.readLine());
-				autenticacionCorrecta = respostaBoolean;
-			}
+	            Boolean respostaBoolean = Boolean.parseBoolean(br.readLine());
+	            if (respostaBoolean) {
+	                break; // Sale del bucle si la autenticación es correcta
+	            } else {
+	                System.out.println("Autenticación incorrecta. Inténtalo de nuevo.");
+	            }
+	        }
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
 	}
+
 
 	private static void enviarMensatge(Scanner teclado, PrintWriter pw) {
 
