@@ -7,10 +7,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.nio.ReadOnlyBufferException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
+
+import javax.swing.JOptionPane;
 
 public class Client {
 
@@ -36,18 +37,6 @@ public class Client {
 			fil.start();
 
 			enviarMensatge(teclado, pw);
-
-			/*
-			 * // Clase auxiliar para manejar el cliente ObjecteClient clientHandler = new
-			 * ObjecteClient("client", 1, socketConnexio, br); Thread envioThread = new
-			 * Thread(() -> enviarMensajes(pw)); Thread recepcionThread = new
-			 * Thread(clientHandler::recibirMensajes);
-			 * 
-			 * // Iniciar hilos envioThread.start(); recepcionThread.start();
-			 * 
-			 * // Esperar hasta que ambos hilos terminen envioThread.join();
-			 * recepcionThread.join();
-			 */
 
 			socketConnexio.close();
 		} catch (Exception e) {
@@ -82,17 +71,23 @@ public class Client {
 
 	private static void enviarMensatge(Scanner teclado, PrintWriter pw) {
 
+		System.out.println("Click ESPAI y ENTER per enviar missatge: ");
 		while (true) {
-			System.out.println("Mensatje: ");
-			String mensaje = teclado.nextLine();
-			if (mensaje.equalsIgnoreCase("exit")) {
-				pw.println(mensaje);
-				break;
-			} else if (mensaje.equalsIgnoreCase("?")) {
-				pw.println(mensaje);
-			} else
-				pw.println(mensaje + " - " + getTimestamp());
-
+			String enter = teclado.nextLine();
+			if (enter.equals(" ")) {
+				
+				String mensatje = JOptionPane.showInputDialog("Escriu el mensatge aci:");
+				if (mensatje != null) {
+					
+					if (mensatje.equalsIgnoreCase("exit")) {
+						pw.println(mensatje);
+						break;
+					} else if (mensatje.equalsIgnoreCase("?")) {
+						pw.println(mensatje);
+					} else
+						pw.println(mensatje + " - " + getTimestamp());
+				}
+			}
 		}
 	}
 

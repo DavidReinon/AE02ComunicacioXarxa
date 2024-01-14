@@ -13,14 +13,6 @@ public class ObjecteClient {
         this.socketConexio = socketConexio;
     }
 
-	/*
-	 * public void recibirMensajes() { try { while (true) { String mensaje =
-	 * br.readLine(); System.out.println("SERVIDOR >>> " + mensaje); } } catch
-	 * (IOException e) { e.printStackTrace(); } }
-	 */
-
-    // Agrega getters y setters según sea necesario
-
     public String getNom() {
         return nom;
     }

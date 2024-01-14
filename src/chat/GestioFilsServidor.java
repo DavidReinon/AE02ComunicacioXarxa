@@ -15,6 +15,7 @@ import java.util.List;
 public class GestioFilsServidor implements Runnable {
 	private static List<ObjecteClient> llistaClients;
 	private ObjecteClient objecteClient;
+	private String nom;
 	private BufferedReader br;
 	private PrintWriter pw;
 
@@ -25,6 +26,7 @@ public class GestioFilsServidor implements Runnable {
 
 	@Override
 	public void run() {
+		nom = objecteClient.getNom();
 		try {
 			// Recibir
 			InputStream is = objecteClient.getSocket().getInputStream();
@@ -65,7 +67,7 @@ public class GestioFilsServidor implements Runnable {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.err.println("SERVIDOR >>> Error.");
+			System.err.println("SERVIDOR >>> Error en " + nom);
 
 		}
 
@@ -111,24 +113,22 @@ public class GestioFilsServidor implements Runnable {
 
 					// Per no enviar el '@usuari' comença per 1
 					for (int i = 1; i < missatgeArrayStrings.length; i++) {
-						mensatgeSenseTagString += missatgeArrayStrings[i];
+						mensatgeSenseTagString += missatgeArrayStrings[i] + " ";
 					}
 
-					pwThisClient.println(objecteClient.getNom() + " >>> " + mensatgeSenseTagString);
+					pwThisClient.println(nom + " >>> " + mensatgeSenseTagString);
 					pwThisClient.println();
 					break;
 				}
 			}
 			return true;
-
 		}
 
-		
+		// Mensatge per a tots
 		for (ObjecteClient client : llistaClients) {
-			
-			// Mensatge per a tots menos a ell mateix
-			if (!client.getNom().equals(objecteClient.getNom())) {
-				
+			// Menos a ell mateix
+			if (!client.getNom().equals(nom)) {
+
 				OutputStream osThisClient = null;
 				try {
 					osThisClient = client.getSocket().getOutputStream();
@@ -137,7 +137,7 @@ public class GestioFilsServidor implements Runnable {
 				}
 
 				PrintWriter pwThisClient = new PrintWriter(osThisClient, true);
-				pwThisClient.println(objecteClient.getNom() + " >>> " + missatge);
+				pwThisClient.println(nom + " >>> " + missatge);
 			}
 		}
 		return false;
