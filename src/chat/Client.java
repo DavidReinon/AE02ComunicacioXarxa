@@ -45,20 +45,20 @@ public class Client {
 		teclado.close();
 	}
 
-	private static void autenticacio(Scanner teclado, PrintWriter pw, BufferedReader br) {
+	private static void autenticacio(Scanner teclat, PrintWriter pw, BufferedReader br) {
 		boolean autenticacionCorrecta = false;
 		try {
 			while (!autenticacionCorrecta) {
-				System.out.print("Usuario: ");
-				String usuario = teclado.nextLine();
+				System.out.print("Usuari: ");
+				String usuario = teclat.nextLine();
 				System.out.print("Contrasenya: ");
-				String contrasenya = teclado.nextLine();
+				String contrasenya = teclat.nextLine();
 
 				pw.println(usuario);
 				pw.println(contrasenya);
 
 				String respostaString = br.readLine();
-				System.out.println("SERVIDOR >>> " + respostaString);
+				System.err.println("SERVIDOR >>> " + respostaString);
 
 				Boolean respostaBoolean = Boolean.parseBoolean(br.readLine());
 				autenticacionCorrecta = respostaBoolean;

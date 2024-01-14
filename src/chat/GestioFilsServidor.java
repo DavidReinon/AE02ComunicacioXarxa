@@ -37,33 +37,9 @@ public class GestioFilsServidor implements Runnable {
 			OutputStream os = objecteClient.getSocket().getOutputStream();
 			pw = new PrintWriter(os, true);
 
-			boolean autenticacioCorrecta = false;
-			while (!autenticacioCorrecta) {
+			autenticacioClient();
 
-				String usuari = br.readLine();
-				String contrasenya = br.readLine();
-
-				if (AutenticacioUsuari(usuari, contrasenya)) {
-					System.out.println("SERVIDOR >>> Autenticacio correcta.");
-					pw.println("Ok");
-					pw.println(true);
-					autenticacioCorrecta = true;
-				} else {
-					System.out.println("SERVIDOR >>> Autenticacio incorrecta.");
-					pw.println("Usuari o contrasenya incorrectes");
-					pw.println(false);
-				}
-			}
-
-			boolean seguir = true;
-			while (seguir) {
-				String missatge = br.readLine();
-				if (missatge == null) {
-					seguir = false; // Se detectó el cierre del BufferedReader
-				} else if (!missatge.isBlank()) {
-					seguir = ExecutarMisstage(missatge);
-				}
-			}
+			processEnviuMissatges();
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -73,74 +49,29 @@ public class GestioFilsServidor implements Runnable {
 
 	}
 
-	private boolean ExecutarMisstage(String missatge) {
-		if (missatge.equals("exit")) {
-			llistaClients.remove(objecteClient);
-			try {
-				objecteClient.getSocket().close();
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.err.println("SERVIDOR >>> Error al tancar socket client.");
+	private void autenticacioClient() {
+		boolean autenticacioCorrecta = false;
+		try {
+			while (!autenticacioCorrecta) {
 
-			}
-			// Client tanca la seva terminal
-			return false;
-		}
-		if (missatge.equals("?")) {
-			pw.print("Clients disponibles:");
-			for (ObjecteClient client : llistaClients) {
-				pw.print(" | " + client.getNom());
-			}
-			pw.println();
-			return true;
-		}
-		if (missatge.startsWith("@")) {
-			String[] missatgeArrayStrings = missatge.split(" ");
-			String usuariTag = missatgeArrayStrings[0].substring(1);
+				String usuari = br.readLine();
+				String contrasenya = br.readLine();
 
-			for (ObjecteClient client : llistaClients) {
-
-				if (client.getNom().equals(usuariTag)) {
-					OutputStream osThisClient = null;
-					try {
-						osThisClient = client.getSocket().getOutputStream();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-
-					PrintWriter pwThisClient = new PrintWriter(osThisClient, true);
-					String mensatgeSenseTagString = "";
-
-					// Per no enviar el '@usuari' comença per 1
-					for (int i = 1; i < missatgeArrayStrings.length; i++) {
-						mensatgeSenseTagString += missatgeArrayStrings[i] + " ";
-					}
-
-					pwThisClient.println(nom + " >>> " + mensatgeSenseTagString);
-					pwThisClient.println();
-					break;
+				if (AutenticacioUsuari(usuari, contrasenya)) {
+					System.out.println("SERVIDOR >>> Autenticacio del client " + nom + " correcta.");
+					pw.println("Ok");
+					pw.println(true);
+					autenticacioCorrecta = true;
+				} else {
+					System.out.println("SERVIDOR >>> Autenticacio del client " + nom + " incorrecta.");
+					pw.println("Usuari o contrasenya incorrectes");
+					pw.println(false);
 				}
 			}
-			return true;
+		} catch (Exception e) {
+			System.err.println("SERVIDOR >>> Error en autenticacio de " + nom);
 		}
 
-		// Mensatge per a tots
-		for (ObjecteClient client : llistaClients) {
-			// Menos a ell mateix
-			if (!client.getNom().equals(nom)) {
-
-				OutputStream osThisClient = null;
-				try {
-					osThisClient = client.getSocket().getOutputStream();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-
-				PrintWriter pwThisClient = new PrintWriter(osThisClient, true);
-				pwThisClient.println(nom + " >>> " + missatge);
-			}
-		}
-		return false;
 	}
 
 	private boolean AutenticacioUsuari(String usuario, String Contrasenya) {
@@ -159,6 +90,107 @@ public class GestioFilsServidor implements Runnable {
 			e.printStackTrace();
 		}
 		return resultat;
+	}
+
+	private void processEnviuMissatges() {
+		boolean seguir = true;
+		try {
+			while (seguir) {
+				String missatge = br.readLine();
+				if (missatge == null) {
+					seguir = false; // Se detectó el cierre del BufferedReader
+				} else if (!missatge.isBlank()) {
+					seguir = executarMissatge(missatge);
+				}
+			}
+		} catch (Exception e) {
+			System.err.println("SERVIDOR >>> Error en enviu de " + nom);
+		}
+
+	}
+
+	private boolean executarMissatge(String missatge) {
+		if (missatge.equals("exit")) {
+			return exitClient();
+
+		} else if (missatge.equals("?")) {
+			return mostrarLListaClientsDisponibles();
+
+		} else if (missatge.startsWith("@")) {
+			return mensatgePersonal(missatge);
+
+		} else {
+			// Mensaje para todos
+			return mensatgeGlobal(missatge);
+		}
+	}
+
+	private boolean exitClient() {
+		llistaClients.remove(objecteClient);
+		try {
+			objecteClient.getSocket().close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.err.println("SERVIDOR >>> Error al tancar socket client.");
+		}
+		// Client tanca la seva terminal
+		return false;
+	}
+
+	private boolean mostrarLListaClientsDisponibles() {
+		pw.print("Clients disponibles:");
+		for (ObjecteClient client : llistaClients) {
+			pw.print(" | " + client.getNom());
+		}
+		pw.println();
+		return true;
+	}
+
+	private boolean mensatgePersonal(String missatge) {
+		String[] missatgeArrayStrings = missatge.split(" ");
+		String usuariTag = missatgeArrayStrings[0].substring(1);
+
+		for (ObjecteClient client : llistaClients) {
+			if (client.getNom().equals(usuariTag)) {
+				OutputStream osThisClient = null;
+				try {
+					osThisClient = client.getSocket().getOutputStream();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+				PrintWriter pwThisClient = new PrintWriter(osThisClient, true);
+				String mensatgeSenseTagString = "";
+
+				// Per no enviar el '@usuari' comença per 1
+				for (int i = 1; i < missatgeArrayStrings.length; i++) {
+					mensatgeSenseTagString += missatgeArrayStrings[i] + " ";
+				}
+
+				pwThisClient.println(nom + " >>> " + mensatgeSenseTagString);
+				pwThisClient.println();
+				break;
+			}
+		}
+		return true;
+	}
+
+	private boolean mensatgeGlobal(String missatge) {
+		for (ObjecteClient client : llistaClients) {
+			// Menos a ell mateix
+			if (!client.getNom().equals(nom)) {
+				OutputStream osThisClient = null;
+				try {
+					osThisClient = client.getSocket().getOutputStream();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+				PrintWriter pwThisClient = new PrintWriter(osThisClient, true);
+				pwThisClient.println(nom + " >>> " + missatge);
+			}
+		}
+		return false;
 	}
 
 }
