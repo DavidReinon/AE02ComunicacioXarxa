@@ -88,7 +88,7 @@ public class Client {
 			if (enter.equals(" ")) {
 				
 				String mensatje = JOptionPane.showInputDialog("Escriu el mensatge aci:");
-				if (mensatje != null) {
+				if (mensatje != null ) {
 					
 					if (mensatje.equalsIgnoreCase("exit")) {
 						pw.println(mensatje);

@@ -162,6 +162,7 @@ public class GestioFilsServidor implements Runnable {
 	 */
 	private boolean exitClient() {
 		llistaClients.remove(objecteClient);
+		llistaUsuarisAutenticacio.remove(objecteClient.getIndex());
 		try {
 			objecteClient.getSocket().close();
 		} catch (IOException e) {
