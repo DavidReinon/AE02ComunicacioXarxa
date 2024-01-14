@@ -14,6 +14,7 @@ import java.util.List;
 
 public class GestioFilsServidor implements Runnable {
 	private static List<ObjecteClient> llistaClients;
+	private static List<String> llistaUsuarisAutenticacio = new ArrayList<String>();
 	private ObjecteClient objecteClient;
 	private String nom;
 	private BufferedReader br;
@@ -62,12 +63,21 @@ public class GestioFilsServidor implements Runnable {
 				String contrasenya = br.readLine();
 
 				if (comprobarCredencials(usuari, contrasenya)) {
-					System.out.println("SERVIDOR >>> Autenticacio del client " + nom + " correcta.");
-					pw.println("Ok");
-					pw.println(true);
-					autenticacioCorrecta = true;
+
+					if (!llistaUsuarisAutenticacio.isEmpty() && llistaUsuarisAutenticacio.contains(usuari)) {
+						System.out.println("SERVIDOR >>> Autenticacio del " + nom + " incorrecta.");
+						pw.println("Ya existeix un client conectat amb aquest usuari.");
+						pw.println(false);
+					} else {
+						System.out.println("SERVIDOR >>> Autenticacio del " + nom + " correcta.");
+						llistaUsuarisAutenticacio.add(usuari);
+						pw.println("Ok");
+						pw.println(true);
+						autenticacioCorrecta = true;
+					}
+
 				} else {
-					System.out.println("SERVIDOR >>> Autenticacio del client " + nom + " incorrecta.");
+					System.out.println("SERVIDOR >>> Autenticacio del " + nom + " incorrecta.");
 					pw.println("Usuari o contrasenya incorrectes");
 					pw.println(false);
 				}
