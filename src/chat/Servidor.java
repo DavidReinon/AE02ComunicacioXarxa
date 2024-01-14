@@ -27,8 +27,8 @@ public class Servidor {
 					connexio);
 			listaClients.add(objecteClient);
 
-			System.err.println(
-					"SERVIDOR >>> Conexión recibida --> Lanza hilo para gestionar: " + objecteClient.getNom());
+			System.err
+					.println("SERVIDOR >>> Conexión recibida --> Lanza fil per a gestionar: " + objecteClient.getNom());
 			GestioFilsServidor filServidor = new GestioFilsServidor(listaClients, objecteClient);
 			Thread fil = new Thread(filServidor);
 			fil.start();
