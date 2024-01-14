@@ -49,6 +49,10 @@ public class GestioFilsServidor implements Runnable {
 
 	}
 
+	/**
+	 * Bucle que s'encarrega de autenticar al client y li torna un booleano depenent
+	 * del resultat
+	 */
 	private void autenticacioClient() {
 		boolean autenticacioCorrecta = false;
 		try {
@@ -57,7 +61,7 @@ public class GestioFilsServidor implements Runnable {
 				String usuari = br.readLine();
 				String contrasenya = br.readLine();
 
-				if (AutenticacioUsuari(usuari, contrasenya)) {
+				if (comprobarCredencials(usuari, contrasenya)) {
 					System.out.println("SERVIDOR >>> Autenticacio del client " + nom + " correcta.");
 					pw.println("Ok");
 					pw.println(true);
@@ -74,7 +78,14 @@ public class GestioFilsServidor implements Runnable {
 
 	}
 
-	private boolean AutenticacioUsuari(String usuario, String Contrasenya) {
+	/**
+	 * Comproba les credencials introduides per el client
+	 * 
+	 * @param usuari
+	 * @param Contrasenya
+	 * @return true si son correctes, false si no.
+	 */
+	private boolean comprobarCredencials(String usuari, String Contrasenya) {
 		File autenticacio = new File("autenticacio.txt");
 		boolean resultat = false;
 		try (BufferedReader br = new BufferedReader(new FileReader(autenticacio))) {
@@ -82,7 +93,7 @@ public class GestioFilsServidor implements Runnable {
 			String[] usuariInfo = new String[2];
 			while ((linea = br.readLine()) != null) {
 				usuariInfo = linea.split(";");
-				if (usuariInfo[0].equals(usuario) && usuariInfo[1].equals(Contrasenya)) {
+				if (usuariInfo[0].equals(usuari) && usuariInfo[1].equals(Contrasenya)) {
 					resultat = true;
 				}
 			}
@@ -92,6 +103,9 @@ public class GestioFilsServidor implements Runnable {
 		return resultat;
 	}
 
+	/**
+	 * Gestiona el bucle d'enviu de missatges
+	 */
 	private void processEnviuMissatges() {
 		boolean seguir = true;
 		try {
@@ -109,6 +123,12 @@ public class GestioFilsServidor implements Runnable {
 
 	}
 
+	/**
+	 * Executa la opcio del missatge que es convenient
+	 * 
+	 * @param missatge
+	 * @return false en la opcio 'exit', true en les de mes.
+	 */
 	private boolean executarMissatge(String missatge) {
 		if (missatge.equals("exit")) {
 			return exitClient();
@@ -125,6 +145,11 @@ public class GestioFilsServidor implements Runnable {
 		}
 	}
 
+	/**
+	 * Executa la eixida del client
+	 * 
+	 * @return false, per finalitzar el bucle de lectura
+	 */
 	private boolean exitClient() {
 		llistaClients.remove(objecteClient);
 		try {
@@ -137,6 +162,11 @@ public class GestioFilsServidor implements Runnable {
 		return false;
 	}
 
+	/**
+	 * Envia al client la llista de tots els client que estan disponibles
+	 * 
+	 * @return true
+	 */
 	private boolean mostrarLListaClientsDisponibles() {
 		pw.print("Clients disponibles:");
 		for (ObjecteClient client : llistaClients) {
@@ -146,6 +176,13 @@ public class GestioFilsServidor implements Runnable {
 		return true;
 	}
 
+	/**
+	 * Envia el misstage del client a altre client en concret. Concretat per @ al
+	 * principi del misstage.
+	 * 
+	 * @param missatge
+	 * @return true
+	 */
 	private boolean mensatgePersonal(String missatge) {
 		String[] missatgeArrayStrings = missatge.split(" ");
 		String usuariTag = missatgeArrayStrings[0].substring(1);
@@ -175,6 +212,12 @@ public class GestioFilsServidor implements Runnable {
 		return true;
 	}
 
+	/**
+	 * Envia el misstage del client a tots els clients conectats
+	 * 
+	 * @param missatge
+	 * @return
+	 */
 	private boolean mensatgeGlobal(String missatge) {
 		for (ObjecteClient client : llistaClients) {
 			// Menos a ell mateix

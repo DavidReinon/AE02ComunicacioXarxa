@@ -45,6 +45,12 @@ public class Client {
 		teclado.close();
 	}
 
+	/**
+	 * Envia les creedencials per autenticarse al servidor.
+	 * @param teclat
+	 * @param pw
+	 * @param br
+	 */
 	private static void autenticacio(Scanner teclat, PrintWriter pw, BufferedReader br) {
 		boolean autenticacionCorrecta = false;
 		try {
@@ -69,6 +75,11 @@ public class Client {
 		}
 	}
 
+	/**
+	 * Envia els mensatges al servidor.
+	 * @param teclado
+	 * @param pw
+	 */
 	private static void enviarMensatge(Scanner teclado, PrintWriter pw) {
 
 		System.out.println("Click ESPAI y ENTER per enviar missatge: ");
@@ -85,13 +96,13 @@ public class Client {
 					} else if (mensatje.equalsIgnoreCase("?")) {
 						pw.println(mensatje);
 					} else
-						pw.println(mensatje + " - " + getTimestamp());
+						pw.println(mensatje + " - " + generarTimestamp());
 				}
 			}
 		}
 	}
 
-	private static String getTimestamp() {
+	private static String generarTimestamp() {
 		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 		return "[" + sdf.format(new Date()) + "]";
 	}
